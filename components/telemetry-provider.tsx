@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, type ReactNode } from "react"
-import { initTelemetry, trackPageView } from "@/lib/telemetry"
+import { trackPageView } from "@/lib/telemetry"
 import { usePathname } from "next/navigation"
+import { initTelemetry } from "@hyperlook/telemetry-sdk";
 
 interface TelemetryProviderProps {
   children: ReactNode
@@ -12,11 +13,14 @@ export function TelemetryProvider({ children }: TelemetryProviderProps) {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Initialize telemetry on app load (client-side only)
-    if (typeof window !== "undefined") {
-      initTelemetry()
-    }
-  }, [])
+    const telemetry = initTelemetry({
+      hyperlookApiKey: "sk_Ld-IpaNxIBVeMlFVMkB7t-Ray1BCEXdtJ4_fwQF3qZg", // Replace with your actual API key
+    });
+
+    return () => {
+      telemetry.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     // Track page views on route changes (client-side only)
