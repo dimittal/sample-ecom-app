@@ -2,6 +2,8 @@ import { supabase, type Product } from "@/lib/supabase"
 import { ProductCard } from "@/components/product-card"
 import { CartSidebar } from "@/components/cart-sidebar"
 
+// Edit made by claude code
+
 // Mock data fallback when database tables don't exist
 function getMockProducts(): Product[] {
   return [
