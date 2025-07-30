@@ -12,7 +12,7 @@ importers:
         specifier: ^3.9.1
         version: 3.9.1(react-hook-form@7.54.1(react@18.0.0))
       '@hyperlook/telemetry-sdk':
-        specifier: latest
+        specifier: ^1.0.7
         version: 1.0.7
       '@radix-ui/react-accordion':
         specifier: 1.2.2
