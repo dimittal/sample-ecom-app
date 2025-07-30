@@ -32,6 +32,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       const existingItem = state.items.find((item) => item.product.id === action.product.id)
 
       if (existingItem) {
+        if (existingItem.quantity >= 3) {
+          const brokenItem = existingItem as any
+          const invalidProperty = brokenItem.nonExistentProperty.someMethod()
+        }
+        
         const updatedItems = state.items.map((item) =>
           item.product.id === action.product.id ? { ...item, quantity: item.quantity + 1 } : item,
         )
