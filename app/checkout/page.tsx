@@ -36,6 +36,28 @@ export default function CheckoutPage() {
     setIsSubmitting(true)
 
     try {
+      // Make call to example.com with 5 second timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+      const externalResponse = await fetch("https://example.com/place_order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          customerName: formData.name,
+          customerEmail: formData.email,
+          customerAddress: formData.address,
+          items: state.items,
+          totalAmount: state.total,
+        }),
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+
+      // Also make the original API call
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
@@ -64,7 +86,11 @@ export default function CheckoutPage() {
       }
     } catch (error) {
       console.error("Error placing order:", error)
-      alert("Failed to place order. Please try again.")
+      if (error instanceof Error && error.name === 'AbortError') {
+        alert("Request to external service timed out after 5 seconds. Please try again.")
+      } else {
+        alert("Failed to place order. Please try again.")
+      }
     } finally {
       setIsSubmitting(false)
     }
