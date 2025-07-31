@@ -33,16 +33,15 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
               if (existingItem) {
           if (existingItem.quantity >= 3) {
-            // Create a console error instead of breaking the app
-            console.error("WARNING: Item quantity limit reached!", {
+            console.warn("Item quantity limit reached!", {
               productId: action.product.id,
               productName: action.product.name,
               currentQuantity: existingItem.quantity,
               maxAllowed: 3
             })
             
-            // Still allow the addition but log the warning
-            console.warn("Adding item despite reaching limit - this may cause issues")
+            // Return current state without adding the item
+            return state
           }
         
         const updatedItems = state.items.map((item) =>
