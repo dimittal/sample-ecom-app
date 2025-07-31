@@ -53,12 +53,18 @@ export function CartSidebar() {
                     <div className="flex-1">
                       <h4 className="font-medium">{item.product.name}</h4>
                       <p className="text-sm text-muted-foreground">${item.product.price.toFixed(2)}</p>
+                      {item.product.stock_quantity > 0 && (
+                        <p className="text-xs text-muted-foreground">
+                          {item.product.stock_quantity} available
+                        </p>
+                      )}
                       <div className="flex items-center space-x-2 mt-2">
                         <Button
                           variant="outline"
                           size="icon"
                           className="h-8 w-8 bg-transparent"
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
@@ -68,6 +74,9 @@ export function CartSidebar() {
                           size="icon"
                           className="h-8 w-8 bg-transparent"
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          disabled={item.quantity >= item.product.stock_quantity}
+                          title={item.quantity >= item.product.stock_quantity ? 
+                            "Maximum stock reached" : "Add one more"}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
@@ -80,6 +89,11 @@ export function CartSidebar() {
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
+                      {item.quantity >= item.product.stock_quantity && (
+                        <p className="text-xs text-amber-600 mt-1">
+                          Max quantity reached
+                        </p>
+                      )}
                     </div>
                   </div>
                 ))}
