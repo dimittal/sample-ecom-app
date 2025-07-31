@@ -31,19 +31,18 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "ADD_ITEM": {
       const existingItem = state.items.find((item) => item.product.id === action.product.id)
 
-              if (existingItem) {
-          if (existingItem.quantity >= 3) {
-            // Create a console error instead of breaking the app
-            console.error("WARNING: Item quantity limit reached!", {
-              productId: action.product.id,
-              productName: action.product.name,
-              currentQuantity: existingItem.quantity,
-              maxAllowed: 3
-            })
-            
-            // Still allow the addition but log the warning
-            console.warn("Adding item despite reaching limit - this may cause issues")
-          }
+      if (existingItem) {
+        // Check if adding one more would exceed stock
+        if (existingItem.quantity >= action.product.stock_quantity) {
+          console.warn("Cannot add more items: Stock limit reached", {
+            productId: action.product.id,
+            productName: action.product.name,
+            currentQuantity: existingItem.quantity,
+            stockAvailable: action.product.stock_quantity
+          })
+          // Return current state without changes
+          return state
+        }
         
         const updatedItems = state.items.map((item) =>
           item.product.id === action.product.id ? { ...item, quantity: item.quantity + 1 } : item,
@@ -53,6 +52,16 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
         }
       } else {
+        // Check if product is in stock before adding
+        if (action.product.stock_quantity <= 0) {
+          console.warn("Cannot add item: Product is out of stock", {
+            productId: action.product.id,
+            productName: action.product.name,
+            stockAvailable: action.product.stock_quantity
+          })
+          return state
+        }
+
         const updatedItems = [...state.items, { product: action.product, quantity: 1 }]
         return {
           items: updatedItems,
@@ -78,9 +87,22 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         }
       }
 
-      const updatedItems = state.items.map((item) =>
-        item.product.id === action.productId ? { ...item, quantity: action.quantity } : item,
-      )
+      // Validate quantity against stock
+      const updatedItems = state.items.map((item) => {
+        if (item.product.id === action.productId) {
+          const newQuantity = Math.min(action.quantity, item.product.stock_quantity)
+          if (newQuantity !== action.quantity) {
+            console.warn("Quantity adjusted to available stock", {
+              productId: action.productId,
+              requestedQuantity: action.quantity,
+              adjustedQuantity: newQuantity
+            })
+          }
+          return { ...item, quantity: newQuantity }
+        }
+        return item
+      })
+
       return {
         items: updatedItems,
         total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
