@@ -70,6 +70,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         }
       }
 
+      // Apply the same quantity limit as ADD_ITEM
+      if (action.quantity > 10) {
+        return state
+      }
+
       const updatedItems = state.items.map((item) =>
         item.product.id === action.productId ? { ...item, quantity: action.quantity } : item,
       )
