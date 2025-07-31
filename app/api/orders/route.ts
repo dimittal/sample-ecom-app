@@ -6,6 +6,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { customerName, customerEmail, customerAddress, items, totalAmount } = body
 
+    // Validate required fields
+    if (!customerName || !customerEmail || !customerAddress || !items || !totalAmount) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      )
+    }
+
+    // Validate items array
+    if (!Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: "Cart is empty" },
+        { status: 400 }
+      )
+    }
+
     // Check if database tables exist
     const { data: tableCheck, error: tableError } = await supabase.from("orders").select("id").limit(1)
 

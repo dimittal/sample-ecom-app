@@ -26,24 +26,32 @@ export const trackEventAlternative = async (eventName: string, properties?: Reco
     if (typeof window !== "undefined" && (window as any).__hyperlook_config) {
       const config = (window as any).__hyperlook_config
 
-      // Send event via fetch API
-      await fetch("https://api.hyperlook.com/v1/track", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: JSON.stringify({
-          event: eventName,
-          properties: {
-            ...properties,
-            environment: config.environment,
-            url: window.location.href,
-            userAgent: navigator.userAgent,
-            timestamp: new Date().toISOString(),
+      // Send event via fetch API with timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+      try {
+        await fetch("https://api.hyperlook.com/v1/track", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.apiKey}`,
           },
-        }),
-      })
+          body: JSON.stringify({
+            event: eventName,
+            properties: {
+              ...properties,
+              environment: config.environment,
+              url: window.location.href,
+              userAgent: navigator.userAgent,
+              timestamp: new Date().toISOString(),
+            },
+          }),
+          signal: controller.signal,
+        })
+      } finally {
+        clearTimeout(timeoutId)
+      }
     }
   } catch (error) {
     console.error("Failed to track event (alternative):", error)
@@ -55,23 +63,31 @@ export const trackPageViewAlternative = async (pageName: string, properties?: Re
     if (typeof window !== "undefined" && (window as any).__hyperlook_config) {
       const config = (window as any).__hyperlook_config
 
-      await fetch("https://api.hyperlook.com/v1/page", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${config.apiKey}`,
-        },
-        body: JSON.stringify({
-          page: pageName,
-          properties: {
-            ...properties,
-            environment: config.environment,
-            url: window.location.href,
-            referrer: document.referrer,
-            timestamp: new Date().toISOString(),
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+
+      try {
+        await fetch("https://api.hyperlook.com/v1/page", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${config.apiKey}`,
           },
-        }),
-      })
+          body: JSON.stringify({
+            page: pageName,
+            properties: {
+              ...properties,
+              environment: config.environment,
+              url: window.location.href,
+              referrer: document.referrer,
+              timestamp: new Date().toISOString(),
+            },
+          }),
+          signal: controller.signal,
+        })
+      } finally {
+        clearTimeout(timeoutId)
+      }
     }
   } catch (error) {
     console.error("Failed to track page view (alternative):", error)
