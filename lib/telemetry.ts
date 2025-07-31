@@ -1,8 +1,8 @@
 import telemetrySDK from "@hyperlook/telemetry-sdk"
 
-// Initialize Hyperlook Telemetry with your API key
+// Initialize Hyperlook Telemetry with your API key from environment variables
 const telemetryConfig = {
-  apiKey: "sk_Ld-IpaNxIBVeMlFVMkB7t-Ray1BCEXdtJ4_fwQF3qZg",
+  apiKey: process.env.NEXT_PUBLIC_HYPERLOOK_API_KEY || "",
   environment: process.env.NODE_ENV || "development",
   // Optional: Configure additional settings
   enableAutoTracking: true,
@@ -15,9 +15,11 @@ let telemetry: any = null
 // Initialize the SDK
 export const initTelemetry = () => {
   try {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && telemetryConfig.apiKey) {
       telemetry = telemetrySDK.init ? telemetrySDK.init(telemetryConfig) : telemetrySDK(telemetryConfig)
       console.log("Hyperlook Telemetry initialized successfully")
+    } else if (!telemetryConfig.apiKey) {
+      console.warn("Hyperlook Telemetry API key not found. Set NEXT_PUBLIC_HYPERLOOK_API_KEY environment variable.")
     }
   } catch (error) {
     console.error("Failed to initialize Hyperlook Telemetry:", error)
