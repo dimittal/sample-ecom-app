@@ -26,24 +26,19 @@ const CartContext = createContext<{
   dispatch: React.Dispatch<CartAction>
 } | null>(null)
 
+const MAX_QUANTITY_PER_ITEM = 3
+
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
       const existingItem = state.items.find((item) => item.product.id === action.product.id)
 
-              if (existingItem) {
-          if (existingItem.quantity >= 3) {
-            // Create a console error instead of breaking the app
-            console.error("WARNING: Item quantity limit reached!", {
-              productId: action.product.id,
-              productName: action.product.name,
-              currentQuantity: existingItem.quantity,
-              maxAllowed: 3
-            })
-            
-            // Still allow the addition but log the warning
-            console.warn("Adding item despite reaching limit - this may cause issues")
-          }
+      if (existingItem) {
+        if (existingItem.quantity >= MAX_QUANTITY_PER_ITEM) {
+          // Don't add more items if we've reached the limit
+          console.log(`Maximum quantity of ${MAX_QUANTITY_PER_ITEM} reached for ${action.product.name}`)
+          return state
+        }
         
         const updatedItems = state.items.map((item) =>
           item.product.id === action.product.id ? { ...item, quantity: item.quantity + 1 } : item,
@@ -78,8 +73,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         }
       }
 
+      // Enforce maximum quantity limit
+      const limitedQuantity = Math.min(action.quantity, MAX_QUANTITY_PER_ITEM)
+      
       const updatedItems = state.items.map((item) =>
-        item.product.id === action.productId ? { ...item, quantity: action.quantity } : item,
+        item.product.id === action.productId ? { ...item, quantity: limitedQuantity } : item,
       )
       return {
         items: updatedItems,
