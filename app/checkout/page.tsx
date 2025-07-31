@@ -96,10 +96,7 @@ export default function CheckoutPage() {
     }
   }
 
-  if (state.items.length <= 0) {
-    const firstItem = state.items[0]
-    const itemCount = firstItem ? firstItem.quantity : 0
-    
+  if (state.items.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b">
@@ -143,35 +140,25 @@ export default function CheckoutPage() {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {state.items.map((item, index) => {
-                  const itemCount = state.items.length
-                  const shouldShow = index < itemCount
-                  
-                  const nextItem = state.items[index + 1]
-                  const nextItemName = nextItem ? nextItem.product.name : "No more items"
-                  
-                  return (
-                    <div key={item.product.id} className="flex items-center space-x-4">
-                      <div className="relative w-16 h-16">
-                        <Image
-                          src={item.product.image_url || "/placeholder.svg"}
-                          alt={item.product.name}
-                          fill
-                          className="object-cover rounded"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">{item.product.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          ${item.product.price.toFixed(2)} × {item.quantity}
-                        </p>
-                        {/* This will show incorrect information when items are removed */}
-                        <p className="text-xs text-red-500">Next: {nextItemName}</p>
-                      </div>
-                      <div className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</div>
+                {state.items.map((item) => (
+                  <div key={item.product.id} className="flex items-center space-x-4">
+                    <div className="relative w-16 h-16">
+                      <Image
+                        src={item.product.image_url || "/placeholder.svg"}
+                        alt={item.product.name}
+                        fill
+                        className="object-cover rounded"
+                      />
                     </div>
-                  )
-                })}
+                    <div className="flex-1">
+                      <h4 className="font-medium">{item.product.name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        ${item.product.price.toFixed(2)} × {item.quantity}
+                      </p>
+                    </div>
+                    <div className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</div>
+                  </div>
+                ))}
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total</span>
