@@ -31,19 +31,18 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case "ADD_ITEM": {
       const existingItem = state.items.find((item) => item.product.id === action.product.id)
 
-              if (existingItem) {
-          if (existingItem.quantity >= 3) {
-            // Create a console error instead of breaking the app
-            console.error("WARNING: Item quantity limit reached!", {
-              productId: action.product.id,
-              productName: action.product.name,
-              currentQuantity: existingItem.quantity,
-              maxAllowed: 3
-            })
-            
-            // Still allow the addition but log the warning
-            console.warn("Adding item despite reaching limit - this may cause issues")
-          }
+      if (existingItem) {
+        if (existingItem.quantity >= 3) {
+          console.error("WARNING: Item quantity limit reached!", {
+            productId: action.product.id,
+            productName: action.product.name,
+            currentQuantity: existingItem.quantity,
+            maxAllowed: 3
+          })
+          
+          // Return current state without modification when limit is reached
+          return state
+        }
         
         const updatedItems = state.items.map((item) =>
           item.product.id === action.product.id ? { ...item, quantity: item.quantity + 1 } : item,
@@ -76,6 +75,22 @@ function cartReducer(state: CartState, action: CartAction): CartState {
           items: updatedItems,
           total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
         }
+      }
+
+      // Enforce quantity limit of 3 per item
+      if (action.quantity > 3) {
+        const item = state.items.find((item) => item.product.id === action.productId)
+        if (item) {
+          console.error("WARNING: Item quantity limit reached!", {
+            productId: action.productId,
+            productName: item.product.name,
+            requestedQuantity: action.quantity,
+            maxAllowed: 3
+          })
+        }
+        
+        // Return current state without modification when limit would be exceeded
+        return state
       }
 
       const updatedItems = state.items.map((item) =>
