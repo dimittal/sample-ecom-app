@@ -68,6 +68,7 @@ export function CartSidebar() {
                           size="icon"
                           className="h-8 w-8 bg-transparent"
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          disabled={item.quantity >= 3}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>

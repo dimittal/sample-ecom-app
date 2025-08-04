@@ -58,7 +58,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <CardFooter className="p-4">
         <Button
           onClick={handleAddToCart}
-          disabled={product.stock_quantity === 0}
+          disabled={product.stock_quantity === 0 || addedQuantity >= 3}
           className={`w-full transition-all duration-300 ${showAdded ? "bg-green-600 hover:bg-green-700" : ""}`}
         >
           {showAdded ? (
@@ -67,7 +67,9 @@ export function ProductCard({ product }: ProductCardProps) {
               Added ({addedQuantity})
             </span>
           ) : product.stock_quantity > 0 ? (
-            addedQuantity > 0 ? (
+            addedQuantity >= 3 ? (
+              "Max Quantity Reached"
+            ) : addedQuantity > 0 ? (
               `Add to Cart (${addedQuantity})`
             ) : (
               "Add to Cart"
