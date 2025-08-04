@@ -53,6 +53,9 @@ export function CartSidebar() {
                     <div className="flex-1">
                       <h4 className="font-medium">{item.product.name}</h4>
                       <p className="text-sm text-muted-foreground">${item.product.price.toFixed(2)}</p>
+                      {item.quantity >= 3 && (
+                        <p className="text-xs text-amber-600 font-medium">Max quantity reached</p>
+                      )}
                       <div className="flex items-center space-x-2 mt-2">
                         <Button
                           variant="outline"
@@ -68,6 +71,8 @@ export function CartSidebar() {
                           size="icon"
                           className="h-8 w-8 bg-transparent"
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          disabled={item.quantity >= 3}
+                          title={item.quantity >= 3 ? "Maximum quantity limit reached (3 items)" : "Increase quantity"}
                         >
                           <Plus className="h-3 w-3" />
                         </Button>

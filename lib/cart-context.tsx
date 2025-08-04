@@ -113,7 +113,22 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 export function CartProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 })
 
-  return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>
+  // Safeguard: Ensure all cart items respect quantity limits
+  const safeState = {
+    ...state,
+    items: state.items.map(item => ({
+      ...item,
+      quantity: Math.min(item.quantity, 3) // Clamp to maximum of 3
+    }))
+  }
+
+  // Recalculate total if any quantities were clamped
+  const finalState = safeState.items !== state.items ? {
+    ...safeState,
+    total: safeState.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  } : state
+
+  return <CartContext.Provider value={{ state: finalState, dispatch }}>{children}</CartContext.Provider>
 }
 
 export function useCart() {
