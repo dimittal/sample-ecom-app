@@ -13,6 +13,7 @@ type CartItem = {
 type CartState = {
   items: CartItem[]
   total: number
+  lastError: string | null
 }
 
 type CartAction =
@@ -20,6 +21,7 @@ type CartAction =
   | { type: "REMOVE_ITEM"; productId: number }
   | { type: "UPDATE_QUANTITY"; productId: number; quantity: number }
   | { type: "CLEAR_CART" }
+  | { type: "CLEAR_ERROR" }
 
 const CartContext = createContext<{
   state: CartState
@@ -33,15 +35,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
       if (existingItem) {
         if (existingItem.quantity >= 3) {
-          console.error("WARNING: Item quantity limit reached!", {
-            productId: action.product.id,
-            productName: action.product.name,
-            currentQuantity: existingItem.quantity,
-            maxAllowed: 3
-          })
-          
-          // Return current state without modification when limit is reached
-          return state
+          // Return state with error message when limit is reached
+          return {
+            ...state,
+            lastError: `Maximum quantity of 3 reached for ${action.product.name}`
+          }
         }
         
         const updatedItems = state.items.map((item) =>
@@ -50,12 +48,14 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         return {
           items: updatedItems,
           total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+          lastError: null,
         }
       } else {
         const updatedItems = [...state.items, { product: action.product, quantity: 1 }]
         return {
           items: updatedItems,
           total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+          lastError: null,
         }
       }
     }
@@ -65,6 +65,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         items: updatedItems,
         total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+        lastError: null,
       }
     }
 
@@ -74,23 +75,20 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         return {
           items: updatedItems,
           total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+          lastError: null,
         }
       }
 
       // Enforce quantity limit of 3 per item
       if (action.quantity > 3) {
         const item = state.items.find((item) => item.product.id === action.productId)
-        if (item) {
-          console.error("WARNING: Item quantity limit reached!", {
-            productId: action.productId,
-            productName: item.product.name,
-            requestedQuantity: action.quantity,
-            maxAllowed: 3
-          })
-        }
+        const productName = item ? item.product.name : 'Item'
         
-        // Return current state without modification when limit would be exceeded
-        return state
+        // Return state with error message when limit would be exceeded
+        return {
+          ...state,
+          lastError: `Maximum quantity of 3 reached for ${productName}`
+        }
       }
 
       const updatedItems = state.items.map((item) =>
@@ -99,11 +97,15 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       return {
         items: updatedItems,
         total: updatedItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+        lastError: null,
       }
     }
 
     case "CLEAR_CART":
-      return { items: [], total: 0 }
+      return { items: [], total: 0, lastError: null }
+
+    case "CLEAR_ERROR":
+      return { ...state, lastError: null }
 
     default:
       return state
@@ -111,7 +113,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 })
+  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0, lastError: null })
 
   return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>
 }
