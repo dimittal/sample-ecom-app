@@ -33,7 +33,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
       if (existingItem) {
         if (existingItem.quantity >= 3) {
-          console.error("WARNING: Item quantity limit reached!", {
+          console.warn("WARNING: Item quantity limit reached!", {
             productId: action.product.id,
             productName: action.product.name,
             currentQuantity: existingItem.quantity,
@@ -81,7 +81,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
       if (action.quantity > 3) {
         const item = state.items.find((item) => item.product.id === action.productId)
         if (item) {
-          console.error("WARNING: Item quantity limit reached!", {
+          console.warn("WARNING: Item quantity limit reached!", {
             productId: action.productId,
             productName: item.product.name,
             requestedQuantity: action.quantity,
