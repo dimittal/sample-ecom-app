@@ -20,7 +20,6 @@ export function FakeApiCaller() {
               "Client API call failed with status:",
               response.status,
             );
-            throw new Error(`Client API call failed: ${response.status}`);
           }
           return response.json();
         })
