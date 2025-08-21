@@ -1,7 +1,6 @@
 import { supabase, type Product } from "@/lib/supabase";
 import { ProductCard } from "@/components/product-card";
 import { CartSidebar } from "@/components/cart-sidebar";
-import { FakeApiCaller } from "@/components/fake-api-caller";
 
 // Mock data fallback when database tables don't exist
 function getMockProducts(): Product[] {
@@ -134,7 +133,6 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <FakeApiCaller />
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">TechStore</h1>
